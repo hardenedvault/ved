@@ -27,6 +27,7 @@ unsigned int msr_validate = 0;
 unsigned int pint_validate = 1;
 unsigned int pint_enforce = 1;
 unsigned int pcfi_validate = 2;
+unsigned int wcfi_validate = 2;
 unsigned int pcfi_enforce = 1;
 unsigned int umh_validate = 1;
 unsigned int umh_enforce = 1;
@@ -62,7 +63,7 @@ p_ro_page p_ro __p_lkrg_read_only = {
       .p_log_level = 3,                   // log_level
       .p_trigger = 0,                     // trigger
       .p_block_modules = 0,               // block_modules
-      .p_hide_lkrg = 0,                   // hide_lkrg
+      .p_hide_lkrg = 1,                   // hide_lkrg
       .p_heartbeat = 0,                   // heartbeat
 #if defined(CONFIG_X86)
       .p_smep_validate = 1,               // smep_validate
@@ -74,6 +75,7 @@ p_ro_page p_ro __p_lkrg_read_only = {
       .p_umh_enforce = 1,                 // umh_enforce
       .p_msr_validate = 0,                // msr_validate
       .p_pcfi_validate = 2,               // pcfi_validate
+      .p_pcfi_validate = 1,               // wcfi_validate
       .p_pcfi_enforce = 1,                // pcfi_enforce
       /* Profiles */
       .p_profile_validate = 3,            // profile_validate
@@ -300,6 +302,12 @@ void p_parse_module_params(void) {
       P_CTRL(p_profile_validate) = 9;
    }
 
+   if (wcfi_validate > 2) {
+      P_CTRL(p_wcfi_validate) = 2;
+   } else if (P_CTRL(p_wcfi_validate) != wcfi_validate) {
+      P_CTRL(p_wcfi_validate) = wcfi_validate;
+   }
+
    /* pcfi_enforce */
    if (pcfi_enforce > 2) {
       P_CTRL(p_pcfi_enforce) = 2;
@@ -398,7 +406,7 @@ static int __init p_lkrg_register(void) {
       return P_LKRG_BOOT_DISABLE_LKRG;
    }
 
-   p_print_log(P_LOG_ALIVE, "Loading LKRG");
+   p_print_log(P_LOG_ALIVE, "Loading VED...\n");
 
    /*
     * Generate random SipHash key
@@ -513,10 +521,12 @@ static int __init p_lkrg_register(void) {
    }
 
    p_integrity_timer();
+   ro_guard_timer_init();
    p_register_notifiers();
    p_init_page_attr();
 
-   p_print_log(P_LOG_ALIVE, "LKRG initialized successfully");
+
+   p_print_log(P_LOG_ALIVE, "VED initialized successfully");
 
    p_ret = P_LKRG_SUCCESS;
 
@@ -528,6 +538,8 @@ p_main_error:
       p_deregister_notifiers();
       if (p_timer.function)
          del_timer_sync(&p_timer);
+      if (ro_guard_timer.function)
+          del_timer_sync(&ro_guard_timer);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0)
       if (p_cpu)
@@ -578,7 +590,8 @@ p_sym_error:
  */
 static void __exit p_lkrg_deregister(void) {
 
-   p_print_log(P_LOG_DYING, "Unloading LKRG");
+
+   p_print_log(P_LOG_DYING, "Unloading VED...\n");
 
    p_uninit_page_attr();
 
@@ -586,6 +599,8 @@ static void __exit p_lkrg_deregister(void) {
    p_deregister_notifiers();
    if (p_timer.function)
       del_timer_sync(&p_timer);
+   if (ro_guard_timer.function)
+       del_timer_sync(&ro_guard_timer);
 
 
    // Freeze all non-kernel processes
@@ -623,7 +638,8 @@ static void __exit p_lkrg_deregister(void) {
    // Thaw all non-kernel processes
    P_SYM(p_thaw_processes)();
 
-   p_print_log(P_LOG_DYING, "LKRG unloaded");
+
+   p_print_log(P_LOG_DYING, "VED unloaded");
 }
 
 
@@ -658,6 +674,8 @@ module_param(umh_enforce, uint, 0000);
 MODULE_PARM_DESC(umh_enforce, "umh_enforce [1 (prevent execution) is default]");
 module_param(pcfi_validate, uint, 0000);
 MODULE_PARM_DESC(pcfi_validate, "pcfi_validate [2 (fully enabled pCFI) is default]");
+module_param(wcfi_validate, uint, 0000);
+MODULE_PARM_DESC(wcfi_validate, "wcfi_validate [1 (Bitmap wCFI) is default]");
 module_param(pcfi_enforce, uint, 0000);
 MODULE_PARM_DESC(pcfi_enforce, "pcfi_enforce [1 (kill task) is default]");
 #if defined(CONFIG_X86)
@@ -671,6 +689,6 @@ module_param(smap_enforce, uint, 0000);
 MODULE_PARM_DESC(smap_enforce, "smap_enforce [2 (panic) is default]");
 #endif
 
-MODULE_AUTHOR("Adam 'pi3' Zabrocki (http://pi3.com.pl)");
-MODULE_DESCRIPTION("pi3's Linux kernel Runtime Guard");
+MODULE_AUTHOR("HardenedVault (https://hardenedvault.org)");
+MODULE_DESCRIPTION("Vault Exploit Defense");
 MODULE_LICENSE("GPL v2");

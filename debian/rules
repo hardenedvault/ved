@@ -11,16 +11,16 @@ include /usr/share/dpkg/pkg-info.mk
 	dh $@ --with dkms
 
 override_dh_install:
-	dh_install -p lkrg-dkms    scripts/ usr/src/$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)
-	dh_install -p lkrg-dkms    src/ usr/src/$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)
-	dh_install -p lkrg-dkms    Makefile usr/src/$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)
-	dh_install -p lkrg-systemd scripts/bootup/systemd/lkrg.service lib/systemd/system
+	dh_install -p ved-dkms    scripts/ usr/src/$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)
+	dh_install -p ved-dkms    src/ usr/src/$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)
+	dh_install -p ved-dkms    Makefile usr/src/$(DEB_SOURCE)-$(DEB_VERSION_UPSTREAM)
+	dh_install -p ved-systemd scripts/bootup/systemd/ved.service lib/systemd/system
 	mkdir -p debian/tmp/etc/sysctl.d
 	mkdir -p debian/tmp/etc/modules-load.d
-	cp scripts/bootup/lkrg.conf debian/tmp/etc/sysctl.d/01-lkrg.conf
-	cp debian/lkrg-dkms.modules debian/tmp/etc/modules-load.d/lkrg-dkms.conf
-	dh_install -p lkrg-dkms    debian/tmp/etc/sysctl.d/01-lkrg.conf etc/sysctl.d
-	dh_install -p lkrg-dkms    debian/tmp/etc/modules-load.d/lkrg-dkms.conf etc/modules-load.d
+	cp scripts/bootup/ved.conf debian/tmp/etc/sysctl.d/01-ved.conf
+	cp debian/ved-dkms.modules debian/tmp/etc/modules-load.d/ved-dkms.conf
+	dh_install -p ved-dkms    debian/tmp/etc/sysctl.d/01-ved.conf etc/sysctl.d
+	dh_install -p ved-dkms    debian/tmp/etc/modules-load.d/ved-dkms.conf etc/modules-load.d
 
 override_dh_dkms:
 	dh_dkms -V $(DEB_VERSION_UPSTREAM)
@@ -30,6 +30,9 @@ override_dh_auto_build:
 override_dh_auto_test:
 override_dh_auto_install:
 override_dh_auto_clean:
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
 
 override_dh_installsystemd:
 	dh_installsystemd --no-enable --no-stop-on-upgrade

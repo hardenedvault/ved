@@ -159,6 +159,7 @@ typedef struct _p_lkrg_global_conf_structure {
    unsigned int p_smap_validate;
 #endif
    unsigned int p_pcfi_validate;
+   unsigned int p_wcfi_validate;
    unsigned int p_pint_validate;
    unsigned int p_kint_validate;
    unsigned int p_log_level;
@@ -248,11 +249,10 @@ typedef struct _p_lkrg_global_symbols_structure {
 #endif
    struct list_head *p_modules;
    struct kset **p_module_kset;
-#if defined(CONFIG_X86)
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0)
+#if defined(CONFIG_X86) && LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0)
    void (*p_native_write_cr4)(unsigned long p_val);
  #endif
-#endif
+   unsigned long (*p_get_symbol_pos)(unsigned long, unsigned long*, unsigned long*);
 #ifdef P_LKRG_UNEXPORTED_MODULE_ADDRESS
    struct module* (*p___module_address)(unsigned long p_val);
    struct module* (*p___module_text_address)(unsigned long p_val);
@@ -271,6 +271,9 @@ typedef struct _p_lkrg_global_symbols_structure {
 #endif
    struct module *p_find_me;
    unsigned int p_state_init;
+
+   int (*send_signal)(int, struct kernel_siginfo *, struct task_struct*, enum pid_type);
+    void (*recalc_sigpending_and_wake)(struct task_struct *t);
 
 } p_lkrg_global_syms;
 
@@ -398,6 +401,7 @@ static inline int p_lkrg_counter_lock_val_read(p_lkrg_counter_lock *p_arg) {
 #include "modules/ksyms/p_resolve_ksym.h"                     // Resolver module
 #include "modules/database/p_database.h"                      // Database module
 #include "modules/integrity_timer/p_integrity_timer.h"        // Integrity timer module
+#include "modules/ro_guard_timer/p_ro_guard_timer.h"        // Integrity timer module
 #include "modules/kmod/p_kmod.h"                              // Kernel's modules module
 #include "modules/notifiers/p_notifiers.h"                    // Notifiers module
 #include "modules/self-defense/hiding/p_hiding.h"             // Hiding module

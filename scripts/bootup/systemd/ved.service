@@ -1,25 +1,25 @@
 ##
-# Systemd service for LKRG (main branch)
+# Systemd service for VED
 #
 # Author:
 #  - Adam 'pi3' Zabrocki (http://pi3.com.pl)
 ##
 
 [Unit]
-Description=Linux Kernel Runtime Guard
-Documentation=https://lkrg.org
+Description=Vault Exploit Defense
+Documentation=https://hardenedvault.net/products/ved/
 DefaultDependencies=no
 After=systemd-modules-load.service
 Before=systemd-sysctl.service
 Before=sysinit.target shutdown.target
 Conflicts=shutdown.target
-ConditionKernelCommandLine=!nolkrg
+ConditionKernelCommandLine=!noved
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/modprobe -v lkrg
-ExecStartPost=/sbin/sysctl -p /etc/sysctl.d/01-lkrg.conf
-ExecStop=/sbin/modprobe -v -r lkrg
+ExecStart=/sbin/modprobe -v ved
+ExecStartPost=/sbin/sysctl -p /etc/sysctl.d/01-ved.conf
+ExecStop=/sbin/modprobe -v -r ved
 RemainAfterExit=yes
 
 [Install]

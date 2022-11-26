@@ -79,6 +79,9 @@ static int p_msr_validate_max = 1;
 static int p_pcfi_validate_min = 0;
 static int p_pcfi_validate_max = 2;
 
+static int p_wcfi_validate_min = 0;
+static int p_wcfi_validate_max = 2;
+
 static int p_pcfi_enforce_min = 0;
 static int p_pcfi_enforce_max = 2;
 
@@ -313,6 +316,15 @@ struct ctl_table p_lkrg_sysctl_table[] = {
       .proc_handler   = p_sysctl_pcfi_validate,
       .extra1         = &p_pcfi_validate_min,
       .extra2         = &p_pcfi_validate_max,
+   },
+   {
+      .procname       = "wcfi_validate",
+      .data           = &P_CTRL(p_wcfi_validate),
+      .maxlen         = sizeof(unsigned int),
+      .mode           = 0600,
+      .proc_handler   = p_sysctl_pcfi_validate,
+      .extra1         = &p_wcfi_validate_min,
+      .extra2         = &p_wcfi_validate_max,
    },
    {
       .procname       = "pcfi_enforce",
@@ -908,6 +920,8 @@ static int p_sysctl_profile_validate(struct ctl_table *p_table, int p_write,
                   P_CTRL(p_pint_validate) = 0;  // Disabled
                   /* pcfi_validate */
                   P_CTRL(p_pcfi_validate) = 0;  // Disabled
+                  /* wcfi validate */
+                  P_CTRL(p_wcfi_validate) = 0;  // Disabled
                   /* umh_validate */
                   P_CTRL(p_umh_validate) = 0;   // Disabled
                   /* msr_validate */
@@ -934,6 +948,8 @@ static int p_sysctl_profile_validate(struct ctl_table *p_table, int p_write,
                   P_CTRL(p_pint_validate) = 1;  // Current task only
                   /* pcfi_validate */
                   P_CTRL(p_pcfi_validate) = 1;  // Weak pCFI
+                  /* wcfi validate */
+                  P_CTRL(p_wcfi_validate) = 1;  // Bitmap wCFI
                   /* umh_validate */
                   P_CTRL(p_umh_validate) = 1;   // Allow specific paths
                   /* msr_validate */
@@ -976,6 +992,8 @@ static int p_sysctl_profile_validate(struct ctl_table *p_table, int p_write,
                   P_CTRL(p_pint_validate) = 1;  // Current
                   /* pcfi_validate */
                   P_CTRL(p_pcfi_validate) = 1;  // Weak pCFI
+                  /* wcfi validate */
+                  P_CTRL(p_wcfi_validate) = 1;  // Bitmap wCFI
                   /* umh_validate */
                   P_CTRL(p_umh_validate) = 1;   // Allow specific paths
                   /* msr_validate */
@@ -1018,6 +1036,8 @@ static int p_sysctl_profile_validate(struct ctl_table *p_table, int p_write,
                   P_CTRL(p_pint_validate) = 1;  // Current
                   /* pcfi_validate */
                   P_CTRL(p_pcfi_validate) = 2;  // Full pCFI
+                  /* wcfi validate */
+                  P_CTRL(p_wcfi_validate) = 2;  // Enable runtime wCFI
                   /* umh_validate */
                   P_CTRL(p_umh_validate) = 1;   // Allow specific paths
                   /* msr_validate */
@@ -1060,6 +1080,8 @@ static int p_sysctl_profile_validate(struct ctl_table *p_table, int p_write,
                   P_CTRL(p_pint_validate) = 3;  // Paranoid()
                   /* pcfi_validate */
                   P_CTRL(p_pcfi_validate) = 2;  // Full pCFI
+                  /* wcfi validate */
+                  P_CTRL(p_wcfi_validate) = 2;  // Enable runtime wCFI
                   /* umh_validate */
                   P_CTRL(p_umh_validate) = 2;   // Full lock-down
                   /* msr_validate */

@@ -1,5 +1,5 @@
 ##
-# Makefile for LKRG (main branch)
+# Makefile for VED (main branch)
 #
 # Author:
 #  - Adam 'pi3' Zabrocki (http://pi3.com.pl)
@@ -8,8 +8,8 @@
 P_OUTPUT = output
 P_PWD ?= $(shell pwd)
 P_KVER ?= $(shell uname -r)
-P_BOOTUP_SCRIPT ?= scripts/bootup/lkrg-bootup.sh
-TARGET := lkrg
+P_BOOTUP_SCRIPT ?= scripts/bootup/ved-bootup.sh
+TARGET := ved
 ifneq ($(KERNELRELEASE),)
     KERNEL := /lib/modules/$(KERNELRELEASE)/build
 else
@@ -31,6 +31,7 @@ $(TARGET)-objs += src/modules/ksyms/p_resolve_ksym.o \
                   src/modules/hashing/p_lkrg_fast_hash.o \
                   src/modules/comm_channel/p_comm_channel.o \
                   src/modules/integrity_timer/p_integrity_timer.o \
+                  src/modules/ro_guard_timer/p_ro_guard_timer.o \
                   src/modules/kmod/p_kmod.o \
                   src/modules/database/CPU.o \
                   src/modules/database/arch/x86/p_x86_metadata.o \
@@ -91,6 +92,10 @@ $(TARGET)-objs += src/modules/ksyms/p_resolve_ksym.o \
                   src/modules/exploit_detection/syscalls/p_scm_send/p_scm_send.o \
                   src/modules/exploit_detection/p_selinux_state.o \
                   src/modules/exploit_detection/p_exploit_detection.o \
+                  src/modules/exploit_detection/syscalls/p_defense_kfunc_reuse/p_commit_creds/p_commit_creds.o \
+                  src/modules/exploit_detection/syscalls/p_defense_kfunc_reuse/text_poke/text_poke.o \
+                  src/modules/exploit_detection/syscalls/p_defense_kfunc_reuse/p_native_write_cr4/p_native_write_cr4.o \
+                  src/modules/exploit_detection/syscalls/self-defense/p_self_defense.o \
                   src/p_lkrg_main.o
 
 
